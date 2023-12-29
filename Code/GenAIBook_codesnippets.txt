@@ -1,0 +1,136 @@
+﻿--Chapter 8 code snippets 
+-------------------------------------   
+ 
+—Here is an example of how to deploy a GAN to AWS SageMaker: 
+ 
+-------------------------------------     
+- model/ 
+  - <your_model_files> 
+- code/ 
+  - inference.py 
+  - requirements.txt 
+   
+-----------------------------------     
+aws s3 mb s3://<your-bucket-name> 
+ 
+------------------------------------- 
+   
+aws s3 cp model/ s3://<your-bucket-name>/model/ --recursive 
+aws s3 cp code/ s3://<your-bucket-name>/code/ --recursive 
+ 
+-------------------------------------     
+aws sagemaker create-model \ 
+  --model-name gan-model \ 
+  --execution-role-arn <your-role-arn> \ 
+  --primary-container ImageUri.dkr.ecr.<your-region>.amazonaws.com/<your-gan-image>:latest 
+  -------------------------------------    aws sagemaker create-endpoint-config \ 
+  --endpoint-config-name gan-endpoint-config \ 
+  --production-variants VariantName=gan-variant,ModelName=gan-model,InstanceType=<your-instance-type>,InitialInstanceCount=1 
+  -------------------------------------     
+aws sagemaker create-endpoint \ 
+  --endpoint-name gan-endpoint \ 
+  --endpoint-config-name gan-endpoint-config 
+   
+-------------------------------------   
+aws sagemaker update-endpoint --endpoint-name gan-endpoint --endpoint-config-name gan-endpoint-config 
+ 
+-------------------------------------------------------------------------- 
+  --Deploying a VAE to AWS  AI platform 
+-------------------------------------------------------------------------- 
+ 
+ 
+aws ecr get-login-password --region <your-region> | docker login --username AWS --password-stdin <your-account-id>.dkr.ecr.<your-region>.amazonaws.com 
+ 
+-------------------------------------------------------------------------- 
+docker tag <your-image> <your-account-id>.dkr.ecr.<your-region>.amazonaws.com/<your-repository>:<tag> 
+ 
+-------------------------------------------------------------------------- 
+docker push <your-account-id>.dkr.ecr.<your-region>.amazonaws.com/<your-repository>:<tag> 
+ 
+-------------------------------------------------------------------------- 
+--Example Deployment Script: 
+ 
+-------------------------------------------------------------------------- 
+ 
+aws sagemaker create-model --model-name <your-model-name> --primary-container Image="<your-image>",ModelDataUrl="<your-model-artifacts-S3-url>" 
+ 
+-------------------------------------------------------------------------- 
+ 
+aws sagemaker create-endpoint-config --endpoint-config-name <your-endpoint-config-name> --production-variants VariantName=<your-variant-name>,ModelName=<your-model-name>,InstanceType=<instance-type>,InitialInstanceCount=<instance-count> 
+-------------------------------------------------------------------------- 
+aws sagemaker create-endpoint --endpoint-name <your-endpoint-name> --endpoint-config-name <your-endpoint-config-name> 
+ 
+-------------------------------------------------------------------------- 
+aws sagemaker wait endpoint-in-service --endpoint-name <your-endpoint-name> 
+ 
+-------------------------------------------------------------------------- 
+--Example of deploying a Generative Adversarial Network (GAN) on Google Cloud using --the Command Line Interface (CLI)  
+-------------------------------------------------------------------------- 
+ 
+gcloud auth login to authenticate with your Google Cloud account. 
+-------------------------------------------------------------------------- 
+gcloud ai-platform models create MODEL_NAME 
+gcloud ai-platform versions create VERSION_NAME \ 
+  --model=MODEL_NAME \ 
+  --origin=gs://YOUR_MODEL_BUCKET_PATH \ 
+  --runtime-version=2.6 \ 
+  --framework="TENSORFLOW" \ 
+  --python-version=3.7 
+-------------------------------------------------------------------------- 
+   
+--Deploying a Variational Autoencoder (VAE) on Google Cloud AI Platform using the Command Line Interface (CLII) 
+-------------------------------------------------------------------------- 
+gcloud auth login to authenticate with your Google Cloud account 
+ 
+-------------------------------------------------------------------------- 
+ 
+gcloud config set project PROJECT_ID  
+-------------------------------------------------------------------------- 
+gcloud ai-platform models create MODEL_NAME 
+gcloud ai-platform versions create VERSION_NAME \ 
+  --model=MODEL_NAME \ 
+  --origin=gs://YOUR_MODEL_BUCKET_PATH \ 
+  --runtime-version=2.6 \ 
+  --framework="TENSORFLOW" \ 
+  --python-version=3.7 
+ 
+-------------------------------------------------------------------------- 
+--Deploying GAN on Microsoft Azure using CLI: 
+ 
+-------------------------------------------------------------------------- 
+ az login 
+ 
+-------------------------------------------------------------------------- 
+az ml workspace create -w WORKSPACE_NAME -g RESOURCE_GROUP 
+ 
+-------------------------------------------------------------------------- 
+az ml model register -m MODEL_PATH -n MODEL_NAME --asset-path ASSET_PATH --model-framework MODEL_FRAMEWORK 
+ 
+-------------------------------------------------------------------------- 
+az ml model deploy -n SERVICE_NAME --service-usage SCORING_ENDPOINT -w WORKSPACE_NAME --cpu CORES --memory MEMORY 
+ 
+-------------------------------------------------------------------------- 
+--Deploying VAE on Microsoft Azure using CLI: 
+ 
+-------------------------------------------------------------------------- 
+az login 
+ 
+-------------------------------------------------------------------------- 
+az ml workspace create -w WORKSPACE_NAME -g RESOURCE_GROUP 
+-------------------------------------------------------------------------- 
+az ml model register -m MODEL_PATH -n MODEL_NAME --asset-path ASSET_PATH --model-framework MODEL_FRAMEWORK 
+ 
+-------------------------------------------------------------------------- 
+az ml model deploy -n SERVICE_NAME --service-usage SCORING_ENDPOINT -w WORKSPACE_NAME --cpu CORES --memory MEMORY 
+ 
+-------------------------------------------------------------------------- 
+ 
+   
+ 
+   
+ 
+ 
+ 
+ 
+ 
+ 
